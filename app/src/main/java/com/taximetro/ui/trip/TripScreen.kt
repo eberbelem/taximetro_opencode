@@ -17,29 +17,35 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.taximetro.map.MapManager
 import com.taximetro.model.FlagType
 import com.taximetro.ui.design.TaximetroColors
+import org.osmdroid.util.GeoPoint
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -342,51 +348,34 @@ private fun MapPlaceholder(
     destinationAddress: String,
     gpsReady: Boolean
 ) {
-    Box(
+    val context = LocalContext.current
+    val mapManager = remember { MapManager(context) }
+
+    AndroidView(
+        factory = {
+            mapManager.createMapView().apply {
+                controller.setZoom(16.0)
+                setBackgroundColor(Color.argb(255, 13, 17, 23))
+            }
+        },
         modifier = Modifier
             .fillMaxWidth()
             .weight(1f)
             .padding(horizontal = 16.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFF0D1117)),
-        contentAlignment = Alignment.Center
-    ) {
-        if (gpsReady && currentLat != 0.0) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "🗺️ ${"%.5f".format(currentLat)}, ${"%.5f".format(currentLng)}",
-                    color = TaximetroColors.TextMuted,
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily.Monospace
-                )
+            .clip(RoundedCornerShape(12.dp)),
+        update = { view ->
+            if (gpsReady && currentLat != 0.0) {
+                view.controller.animateTo(GeoPoint(currentLat, currentLng))
                 if (destinationAddress.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "→ $destinationAddress",
-                        color = TaximetroColors.TextSecondary,
-                        fontSize = 13.sp
-                    )
+                    mapManager.setDestination(currentLat, currentLng, destinationAddress)
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Mapa da rota (Google Maps pendente)",
-                    color = TaximetroColors.TextMuted,
-                    fontSize = 11.sp
-                )
             }
-        } else {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "🛰️",
-                    fontSize = 32.sp
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Aguardando GPS...",
-                    color = TaximetroColors.TextMuted,
-                    fontSize = 13.sp
-                )
-            }
+        }
+    )
+
+    DisposableEffect(Unit) {
+        onDispose {
+            mapManager.onDetach()
         }
     }
 }

@@ -6,29 +6,12 @@
 - Android SDK 34
 - JDK 17
 - Dispositivo Android com API 26+ (Android 8.0+)
-- Google Maps API Key
 
 ## Passos para gerar APK Debug
 
-### 1. Configurar Google Maps API Key
+O mapa usa OpenStreetMap (osmdroid) — gratuito, sem API key.
 
-Abra `app/src/main/res/values/strings.xml` e substitua:
-
-```xml
-<string name="maps_api_key">SUA_API_KEY_AQUI</string>
-```
-
-Por sua chave de API do Google Maps (Android).
-
-Para obter uma chave:
-1. Acesse https://console.cloud.google.com/
-2. Crie um projeto ou selecione existente
-3. Habilite a API "Maps SDK for Android"
-4. Crie uma credencial de "Chave de API"
-5. Restrinja a chave para Android com o SHA-1 do seu keystore de debug:
-   - `keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android`
-
-### 2. Inicializar Gradle Wrapper (primeira vez)
+### 1. Inicializar Gradle Wrapper (primeira vez)
 
 O repositório contém `gradlew.bat` e `gradle-wrapper.properties`, mas o JAR do wrapper precisa ser gerado:
 
@@ -42,7 +25,7 @@ O repositório contém `gradlew.bat` e `gradle-wrapper.properties`, mas o JAR do
 gradle wrapper --gradle-version 8.5
 ```
 
-### 3. Abrir no Android Studio
+### 2. Abrir no Android Studio
 
 ```bash
 # Pelo terminal
@@ -51,7 +34,7 @@ studio "E:\projetos\taximetro opencode"
 # Ou manualmente: File > Open > selecionar a pasta
 ```
 
-### 4. Gerar APK Debug
+### 3. Gerar APK Debug
 
 **Opção A - Pelo Android Studio:**
 
@@ -72,7 +55,7 @@ cd E:\projetos\taximetro opencode
 
 APK gerado em: `app\build\outputs\apk\debug\app-debug.apk`
 
-### 5. Instalar no dispositivo
+### 4. Instalar no dispositivo
 
 ```bash
 # Com o dispositivo conectado via USB (debug USB habilitado)
