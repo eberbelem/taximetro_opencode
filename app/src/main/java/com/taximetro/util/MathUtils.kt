@@ -1,0 +1,28 @@
+package com.taximetro.util
+
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
+
+object MathUtils {
+
+    private const val EARTH_RADIUS_METERS = 6_371_000.0
+
+    fun haversineDistance(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Double {
+        val dLat = Math.toRadians(lat2 - lat1)
+        val dLng = Math.toRadians(lng2 - lng1)
+        val a = sin(dLat / 2).pow(2) + cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLng / 2).pow(2)
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        return EARTH_RADIUS_METERS * c
+    }
+
+    fun speedKmh(distanceMeters: Double, timeSeconds: Double): Double {
+        if (timeSeconds <= 0) return 0.0
+        return (distanceMeters / timeSeconds) * 3.6
+    }
+}
+
+private fun Double.pow(exp: Int): Double {
+    return Math.pow(this, exp.toDouble())
+}
